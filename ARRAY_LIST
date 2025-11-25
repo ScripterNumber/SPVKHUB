@@ -1,0 +1,112 @@
+local ArrayList = {}
+local TweenService = game:GetService("TweenService")
+local TextService = game:GetService("TextService")
+local RunService = game:GetService("RunService")
+
+local MainScreenGui
+local MainFrame
+local ActiveFunctions = {}
+local FunctionLabels = {}
+local RGBConnection
+
+function Init()
+	MainScreenGui = Instance.new('ScreenGui', game.Players.LocalPlayer.PlayerGui)
+	MainScreenGui.Name = 'ArrayList'
+	MainScreenGui.ResetOnSpawn = false
+
+	MainFrame = Instance.new('Frame', MainScreenGui)
+	MainFrame.BackgroundTransparency = 1
+	MainFrame.BorderSizePixel = 0
+	MainFrame.Size = UDim2.new(0.25, 0, 0.99, 0)
+	MainFrame.AnchorPoint = Vector2.new(1, 0)
+	MainFrame.Position = UDim2.new(1, -5, 0, 5)
+
+	--RGBConnection = RunService.Heartbeat:Connect(function()
+	--	local hue = tick() % 5 / 5
+	--	local color = Color3.fromHSV(hue, 1, 1)
+	--	for _, label in pairs(FunctionLabels) do
+	--		if label and label.Parent then
+	--			label.TextColor3 = color
+	--		end
+	--	end
+	--end)
+end
+
+Init()
+
+local function UpdatePositions()
+	for i, Name in ipairs(ActiveFunctions) do
+		if FunctionLabels[Name] then
+			local YPosition = (i - 1) * 27
+			local TweenInfo1 = TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+			local Tween1 = TweenService:Create(FunctionLabels[Name], TweenInfo1, {Position = UDim2.new(0.96, 0, 0, YPosition)})
+			Tween1:Play()
+		end
+	end
+end
+
+function ArrayList.AddFunction(Name)
+	if FunctionLabels[Name] then return end
+
+	local Label = Instance.new('TextLabel', MainFrame)
+	Label.Name = Name
+	Label.Text = Name
+	Label.TextColor3 = Color3.fromRGB(255, 255, 255)
+	Label.TextScaled = false
+	Label.TextSize = 20
+	Label.Font = Enum.Font.MontserratBold
+	Label.FontFace.Weight = Enum.FontWeight.ExtraBold
+	Label.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	Label.BackgroundTransparency = 1
+	Label.BorderSizePixel = 0
+	Label.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+	Label.TextStrokeTransparency = 1
+
+	local TextBounds = TextService:GetTextSize(Name, 18, Enum.Font.SourceSans, Vector2.new(math.huge, math.huge))
+	Label.Size = UDim2.new(0, TextBounds.X + 10, 0, 25)
+
+	Label.AnchorPoint = Vector2.new(1, 0)
+	Label.Position = UDim2.new(1, 200, 0, 0)
+
+	table.insert(ActiveFunctions, Name)
+	table.sort(ActiveFunctions)
+
+	FunctionLabels[Name] = Label
+
+	UpdatePositions()
+
+	task.wait(0.05)
+
+	local OrderIndex = table.find(ActiveFunctions, Name)
+	local YPosition = (OrderIndex - 1) * 27
+
+	local TweenInfo1 = TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	local Tween1 = TweenService:Create(Label, TweenInfo1, {Position = UDim2.new(0.96, 0, 0, YPosition)})
+	Tween1:Play()
+end
+
+function ArrayList.RemoveFunction(Name)
+	if not FunctionLabels[Name] then return end
+
+	local Label = FunctionLabels[Name]
+
+	local TweenInfo1 = TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+	local Tween1 = TweenService:Create(Label, TweenInfo1, {Position = UDim2.new(1, 200, 0, Label.Position.Y.Offset)})
+
+	Tween1:Play()
+	Tween1.Completed:Connect(function()
+		Label:Destroy()
+	end)
+
+	FunctionLabels[Name] = nil
+
+	local Index = table.find(ActiveFunctions, Name)
+	if Index then
+		table.remove(ActiveFunctions, Index)
+	end
+
+	task.wait(0.1)
+	UpdatePositions()
+end
+
+return ArrayList
