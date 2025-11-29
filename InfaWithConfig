@@ -6472,7 +6472,7 @@ local TeleportCheck = false
 Players.LocalPlayer.OnTeleport:Connect(function(State)
 	if KeepInfYield and (not TeleportCheck) and queueteleport then
 		TeleportCheck = true
-		queueteleport(loadstring(game:HttpGet("https://raw.githubusercontent.com/ScripterNumber/Scripts/refs/heads/main/Infa"))())
+		queueteleport(loadstring(game:HttpGet("https://raw.githubusercontent.com/ScripterNumber/SPVKHUB/refs/heads/main/InfaWithConfig"))())
 	end
 end)
 
